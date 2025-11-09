@@ -3,54 +3,49 @@ import { generateToken } from '../lib/utils.js';
 import User from '../model/user.model.js'
 import bcrypt from 'bcryptjs'
 
-export const signup = async (req,res)=>{
+export const signup = async (req, res) => {
+  const { fullName, password, email } = req.body;
 
-    const {fullName,password,email} = req.body
-    try {
-        if(!fullName || !password || !email){
-            return res.status(400).json({message:"All fields are required"})
-        }
 
-        if(password.length < 6){
-            return res.status(400).json({message:"password must be at least 6 characters"});
-
-        }
-        const user = await User.findOne({email})
-
-        if (user) return res.status(400).json({meassage:"Email already exits"})
-        
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password,salt)
-
-        const newUser = new User({
-            fullName,
-            email,
-            password:hashedPassword,
-        })
-        if (newUser){
-            // jwt token
-            await newUser.save();
-            generateToken(newUser._id,res)
-            // console.log(newUser._id)
-            
-
-            res.status(201).json({
-                _id: newUser._id,
-                fullName:newUser.fullName,
-                email :newUser.email,
-                profilePic : newUser.profilePic,
-            })
-
-        }else{
-           res.status(400).json({meassage:"user not exits"}) 
-        }
-    } catch (error) {
-        console.log("Error in signup controller",error.message)
-        res.status(500).json({message:"Internal server error"})
-        
+  try {
+    if (!fullName || !password || !email) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-   
-}
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      fullName,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+    generateToken(newUser._id, res);
+
+    res.status(201).json({
+      _id: newUser._id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      profilePic: newUser.profilePic,
+    });
+
+  } catch (error) {
+    console.log("Error in signup controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const login = async (req,res)=>{
     const {email,password} = req.body;
 
@@ -97,6 +92,7 @@ export  const updateProfile = async (req,res)=>{
 
         const {profilePic} = req.body
         const userId = req.user._id;
+        // console.log("Profile pic data:",profilePic)
 
         if(!profilePic){
             return res.status(400).json({message:"Profile pic is required"})
