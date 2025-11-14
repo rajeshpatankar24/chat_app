@@ -9,7 +9,7 @@ export const useAuthStore = create((set)=>({
     isUpdatingProfile: false,
 
     isCheckingAuth: true,
-
+    IsOnline: false,
     checkAuth: async ()=>{
         try {
             const res = await AxiosInstance.get('/auth/check');
@@ -45,6 +45,8 @@ export const useAuthStore = create((set)=>({
       get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
+      console.log(error.response.data.message)
+      // toast.error(error.message);
     } finally {
       set({ isLoggingIn: false });
     }
