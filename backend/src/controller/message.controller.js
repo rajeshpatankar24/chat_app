@@ -1,23 +1,31 @@
 import User from "../model/user.model.js";
 import Message from "../model/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
- export const getUserForSidebar = (req,res)=>{
+ export const getUserForSidebar = async (req, res) => {
     try {
-        const loggedInUserId = req.user._id;
-        const filterUsers = User.find({_id:{$ne: loggedInUserId}}).select("-password");
+        console.log("Inside getUserForSidebar controller");
+        // console.log(req.user._id);
 
-        res.status(200).json(filterUsers)
+        const loggedInUserId = req.user._id;
+
+        // WAIT for the database result
+        const filterUsers = await User.find({ _id: { $ne: loggedInUserId } })
+                                      .select("-password");
+
+        res.status(200).json(filterUsers);
+        console.log("getUserForSidebar executed successfully");
+        // console.log(filterUsers);
 
     } catch (error) {
-        console.log("Error in getUserForSidebar",error.message)
-        res.status(500).json({error:"Interval server error"});
+        console.log("Error in getUserForSidebar", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
+};
 
- }
 
  export const getMessages =async (req,res)=> {
     try {
-        
+        console.log(req.params)
         const {id = userToChatId}= req.params;
         const myId = req.user._id;
 
